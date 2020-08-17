@@ -13,18 +13,19 @@ plugins {
 group = "com.jashmore.gradle"
 version = "0.0.1-SNAPSHOT"
 
+val assertJVersion: String by project
+val eclipseGitHubConnectorVersion: String by project
+val junitVersion: String by project
+val wiremockVersion: String by project
+
 dependencies {
     implementation(gradleKotlinDsl())
-    api("org.eclipse.mylyn.github:org.eclipse.egit.github.core:2.1.5")
+    api("org.eclipse.mylyn.github:org.eclipse.egit.github.core:$eclipseGitHubConnectorVersion")
 
     testImplementation(gradleTestKit())
-    testImplementation("org.junit.jupiter:junit-jupiter:5.6.2")
-    testImplementation("org.assertj:assertj-core:3.16.1")
-    testImplementation("com.github.tomakehurst:wiremock-jre8:2.27.0")
-}
-
-kotlinDslPluginOptions {
-    experimentalWarning.set(false)
+    testImplementation("org.assertj:assertj-core:$assertJVersion")
+    testImplementation("org.junit.jupiter:junit-jupiter:$junitVersion")
+    testImplementation("com.github.tomakehurst:wiremock-jre8:$wiremockVersion")
 }
 
 tasks.withType<Test> {
@@ -50,7 +51,7 @@ pluginBundle {
             displayName = "GitHub Release Gradle Plugin"
             description = "Plugin for handling milestone releases in a GitHub repository."
             tags = listOf("release")
-            version = "0.0.1"
+            version = (project.version as String)
         }
     }
 }
