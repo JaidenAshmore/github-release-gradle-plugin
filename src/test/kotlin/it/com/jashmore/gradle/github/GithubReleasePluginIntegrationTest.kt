@@ -49,15 +49,12 @@ class GithubReleaseNotesTaskTest {
         val repoName = UUID.randomUUID().toString()
 
         buildFile.writeText("""
-            import com.jashmore.gradle.github.notes.GithubReleaseNotesTask
             import com.jashmore.gradle.github.gitHubRelease
             import org.eclipse.egit.github.core.client.GitHubClient
             
             plugins {
                 id("com.jashmore.gradle.github.release")
             }
-            
-            apply(plugin = "com.jashmore.gradle.github.release")
             
             gitHubRelease {
                 gitHubUser = "$gitHubUser"
@@ -151,8 +148,6 @@ class GithubReleaseNotesTaskTest {
             plugins {
                 id("com.jashmore.gradle.github.release")
             }
-            
-            apply(plugin = "com.jashmore.gradle.github.release")
             
             gitHubRelease {
                 gitHubUser = "user"

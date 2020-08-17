@@ -10,6 +10,7 @@ plugins {
     id("com.gradle.plugin-publish") version "0.12.0"
 }
 
+group = "com.jashmore.gradle"
 version = "0.0.1-SNAPSHOT"
 
 dependencies {

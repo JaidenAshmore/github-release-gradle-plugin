@@ -49,6 +49,9 @@ class GithubReleasePlugin : Plugin<Project> {
         val extension = project.extensions.create<GithubReleaseExtension>("gitHubRelease")
         project.afterEvaluate {
             project.tasks.register<GithubReleaseNotesTask>("createReleaseNotes") {
+                group = "release"
+                description = "Generate the release notes from a GitHub milestone"
+
                 gitHubUser = extension.gitHubUser ?: throw IllegalArgumentException("Required field 'gitHubUser' is not set")
                 repositoryName = extension.repositoryName ?: throw IllegalArgumentException("Required field 'repositoryName' is not set")
                 gitHubClient = extension.gitHubClient
