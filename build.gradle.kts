@@ -11,7 +11,7 @@ plugins {
 }
 
 group = "com.jashmore.gradle"
-version = "0.0.2"
+version = "0.0.3-SNAPSHOT"
 
 val assertJVersion: String by project
 val eclipseGitHubConnectorVersion: String by project
