@@ -27,17 +27,13 @@ jobs:
                   message: Prepare release for ${{steps.version.outputs.version}}
               env:
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-            - name: Set Gradle Publish Credentials
-              uses: eskatos/gradle-command-action@v1
-              env:
-                GRADLE_API_KEY: ${{ secrets.GRADLE_API_KEY }}
-                GRADLE_API_SECRET: ${{ secrets.GRADLE_API_SECRET }}
-              with:
-                arguments: setupPluginUploadFromEnvironment
             - name: Release
               uses: eskatos/gradle-command-action@v1
+              env:
+                  GRADLE_API_KEY: ${{ secrets.GRADLE_API_KEY }}
+                  GRADLE_API_SECRET: ${{ secrets.GRADLE_API_SECRET }}
               with:
-                  arguments: publishPlugins
+                  arguments: setupPluginUploadFromEnvironment publishPlugins
             - name: Set version to next SNAPSHOT version
               uses: eskatos/gradle-command-action@v1
               with:
