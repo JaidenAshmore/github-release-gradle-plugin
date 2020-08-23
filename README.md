@@ -53,6 +53,7 @@ gitHubRelease {
     gitHubUser = "$gitHubUser"
     repositoryName = "$repoName"
     milestoneVersion = "$milestoneVersion"
+    headerRenderer = { milestone -> "Appears above the issue groups: ${milestone.description}" }
     groupings = {
         group {
             heading = "## Enhancements"
@@ -72,6 +73,7 @@ gitHubRelease {
             renderer = { issue, _ -> "- [GH-${issue.number}]: ${issue.title}" }
         }
     }
+    footerRenderer = { milestone -> "Footer!" }
 }
 ```
 

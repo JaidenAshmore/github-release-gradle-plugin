@@ -2,6 +2,7 @@ package com.jashmore.gradle.github.notes
 
 import org.eclipse.egit.github.core.Comment
 import org.eclipse.egit.github.core.Issue
+import org.eclipse.egit.github.core.Milestone
 import org.eclipse.egit.github.core.Repository
 import org.eclipse.egit.github.core.service.IssueService
 import org.eclipse.egit.github.core.service.MilestoneService
@@ -42,7 +43,9 @@ class GithubReleaseNotesService(private val repository: Repository,
      * @return the rendered markdown for the release notes
      */
     fun createReleaseNotes(milestoneVersion: String,
-                           issueGroups: List<IssueGrouping>): String {
+                           headerRenderer: (milestone: Milestone) -> String?,
+                           issueGroups: List<IssueGrouping>,
+                           footerRenderer: (milestone: Milestone) -> String?): String {
         val milestone = milestoneService.getMilestones(repository, "all")
                 .firstOrNull { it.title == milestoneVersion }
                 ?: throw IllegalArgumentException("No milestone found with name: $milestoneVersion")
@@ -54,7 +57,17 @@ class GithubReleaseNotesService(private val repository: Repository,
 
         val issuesNotRendered: MutableSet<Issue> = issues.toMutableSet()
 
-        return issueGroups
+        val releaseNotesBuilder = StringBuilder()
+
+        headerRenderer(milestone)?.apply {
+            releaseNotesBuilder.append("""
+            |$this
+            |
+            |
+            """.trimMargin())
+        }
+
+        releaseNotesBuilder.append(issueGroups
                 .mapNotNull { grouping ->
                     val matchingIssues = issuesNotRendered.filter { grouping.filter(it) }
 
@@ -72,7 +85,17 @@ class GithubReleaseNotesService(private val repository: Repository,
                         """.trimMargin()
                     }
                 }
-                .joinToString("\n")
+                .joinToString("\n"))
+
+        footerRenderer(milestone)?.apply {
+            releaseNotesBuilder.append("""
+            |
+            |
+            |$this
+            """.trimMargin())
+        }
+
+        return releaseNotesBuilder.toString()
     }
 
     private fun renderIssueInGroup(issueGrouping: IssueGrouping, issue: Issue): String {
