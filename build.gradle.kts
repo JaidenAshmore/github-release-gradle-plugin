@@ -11,7 +11,7 @@ plugins {
 }
 
 group = "com.jashmore.gradle"
-version = "0.0.1-SNAPSHOT"
+version = "0.0.2-SNAPSHOT"
 
 val assertJVersion: String by project
 val eclipseGitHubConnectorVersion: String by project
@@ -53,5 +53,73 @@ pluginBundle {
             tags = listOf("release")
             version = (project.version as String)
         }
+    }
+}
+
+fun updateBuildVersion(buildFile: File?, from: String, to: String) {
+    if (buildFile == null) {
+        throw RuntimeException("Required field 'buildFile' is missing")
+    }
+
+    val previousText = buildFile.readText()
+    val newBuildFileText = previousText.replaceFirst(Regex("version\\s*=\\s*\"$from\""), "version = \"$to\"")
+    if (previousText == newBuildFileText) {
+        throw RuntimeException("Build file content did not change")
+    }
+    buildFile.writeText(newBuildFileText)
+}
+
+tasks.register("prepareReleaseVersion") {
+    group = "Release"
+    description = "Remove the SNAPSHOT suffix from the version"
+
+    doLast {
+        val projectVersion = project.version as String
+        val nonSnapshotVersion = projectVersion.replace("-SNAPSHOT", "")
+
+        println("Changing version $projectVersion to non-snapshot version $nonSnapshotVersion")
+
+        updateBuildVersion(buildFile, from = projectVersion, to = nonSnapshotVersion)
+    }
+}
+
+tasks.register("prepareNextSnapshotVersion") {
+    group = "Release"
+    description = "Update the version of the application to be the next SNAPSHOT version"
+
+    doLast {
+        val projectVersion = project.version as String
+        val nonSnapshotVersion =  projectVersion.replace("-SNAPSHOT", "")
+        val deliminator = if (nonSnapshotVersion.contains("-M")) "-M" else "."
+        val lastNumber = nonSnapshotVersion.substringAfterLast(deliminator).toInt()
+        val versionPrefix = nonSnapshotVersion.substringBeforeLast(deliminator)
+        val nextSnapshotVersion = "$versionPrefix$deliminator${lastNumber + 1}-SNAPSHOT"
+
+        println("Changing version $projectVersion to snapshot version $nextSnapshotVersion")
+
+        updateBuildVersion(buildFile, from = projectVersion, to = nextSnapshotVersion)
+    }
+}
+
+tasks.create("setupPluginUploadFromEnvironment") {
+    doLast {
+        val key = System.getenv("GRADLE_API_KEY")
+        val secret = System.getenv("GRADLE_API_SECRET")
+
+        if (key == null || secret == null) {
+            throw GradleException("GRADLE_API_KEY and/or GRADLE_API_SECRET are not defined environment variables")
+        }
+
+        System.setProperty("gradle.publish.key", key)
+        System.setProperty("gradle.publish.secret", secret)
+    }
+}
+
+/**
+ * Used to print out the current version so it can be saved as an output variable in a GitHub workflow.
+ */
+tasks.register("saveVersionForGitHub") {
+    doLast {
+        println("::set-output name=version::${project.version}")
     }
 }
