@@ -194,6 +194,7 @@ class GithubReleaseNotesTaskTest {
                 repositoryName = "$repoName"
                 gitHubClient = GitHubClient("localhost", ${wireMockServer.port()}, "http")
                 outputFile = File(project.buildDir.resolve("myfile.md").toString())
+                headerRenderer = { milestone -> "Milestone release: ${"$"}{milestone.description}" }
                 groupings = {
                     group {
                         heading = ""${'"'}
@@ -223,6 +224,7 @@ class GithubReleaseNotesTaskTest {
                         renderer = { issue, _ -> "- [GH-${"$"}{issue.number}]: ${"$"}{issue.title}" }
                     }
                 }
+                footerRenderer = { milestone -> "Footer: ${"$"}{milestone.description}" }
                 milestoneVersion = project.properties["milestone"] as String
             }
         """.trimIndent())
@@ -233,10 +235,12 @@ class GithubReleaseNotesTaskTest {
                 Milestone().apply {
                     number = 20
                     title = "1.0.0"
+                    description = "First milestone"
                 },
                 Milestone().apply {
                     number = 21
                     title = "2.0.0"
+                    description = "Second milestone"
                 }
         )
         mockIssues(
@@ -310,6 +314,8 @@ class GithubReleaseNotesTaskTest {
 
         // assert
         assertThat(tempDir.resolve("build").resolve("myfile.md").readText()).isEqualTo("""
+            Milestone release: First milestone
+            
             ## Enhancements
             New features that have been added
 
@@ -325,6 +331,8 @@ class GithubReleaseNotesTaskTest {
             Stomping out the bugs
             
             - [GH-$thirdIssueId]: Fix this bug
+            
+            Footer: First milestone
             """.trimIndent())
     }
 

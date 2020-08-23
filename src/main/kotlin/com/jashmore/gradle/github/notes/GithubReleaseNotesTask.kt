@@ -1,6 +1,7 @@
 package com.jashmore.gradle.github.notes
 
 import org.eclipse.egit.github.core.Issue
+import org.eclipse.egit.github.core.Milestone
 import org.eclipse.egit.github.core.client.GitHubClient
 import org.eclipse.egit.github.core.service.IssueService
 import org.eclipse.egit.github.core.service.MilestoneService
@@ -81,6 +82,24 @@ open class GithubReleaseNotesTask : DefaultTask() {
     var milestoneVersion: String = NO_MILESTONE
 
     /**
+     * Optional function for generating the header content of the release notes based on the milestone that is being
+     * released.
+     *
+     * <p>If this function returns null, no header will be included in the release notes.
+     */
+    @Input
+    var headerRenderer: (milestone: Milestone) -> String? = { null }
+
+    /**
+     * Optional function for generating the footer content of the release notes based on the milestone that is being
+     * released.
+     *
+     * <p>If this function returns null, no footer will be included in the release notes.
+     */
+    @Input
+    var footerRenderer: (milestone: Milestone) -> String? = { null }
+
+    /**
      * The client that should be used to communicate with the GitHub API.
      */
     @Internal
@@ -118,7 +137,7 @@ open class GithubReleaseNotesTask : DefaultTask() {
         groupingsDsl.groupings()
 
         val releaseNotes = GithubReleaseNotesService(repository, milestoneService, issueService)
-                .createReleaseNotes(milestoneVersion, groupingsDsl.groups)
+                .createReleaseNotes(milestoneVersion, headerRenderer, groupingsDsl.groups, footerRenderer)
 
         logger.debug("Printing release notes to ${outputFile.toPath()}")
         outputFile.writeText(releaseNotes);

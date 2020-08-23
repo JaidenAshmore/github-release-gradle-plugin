@@ -3,33 +3,39 @@ Gradle Plugin to manage documenting the release of a GitHub repository.
 
 ## Getting Started
 
-Apply the plugin using the Plugin DSL and configure the GitHub repository with the configuration for generating
+1. Apply the plugin using the Plugin DSL and configure the GitHub repository with the configuration for generating
 the Release Notes.
 
-```kotlin
-import com.jashmore.gradle.github.gitHubRelease
-
-plugins {
-    id("com.jashmore.gradle.github.release") version "${insert.version}"
-}
-
-gitHubRelease {
-    gitHubUser = "$gitHubUser"
-    repositoryName = "$repoName"
-    milestoneVersion = "$milestoneVersion"
-    groupings = {
-        group {
-            heading = "# All issues"
-            filter = { true }
-            renderer = { issue, comments -> "- ${issue.title}" }
+    ```kotlin
+    import com.jashmore.gradle.github.gitHubRelease
+    
+    plugins {
+        id("com.jashmore.gradle.github.release") version "${insert.version}"
+    }
+    
+    gitHubRelease {
+        gitHubUser = "$gitHubUser"
+        repositoryName = "$repoName"
+        milestoneVersion = "$milestoneVersion"
+        groupings = {
+            group {
+                heading = "# All issues"
+                filter = { true }
+                renderer = { issue, comments -> "- ${issue.title}" }
+            }
         }
     }
-}
-```
+    ```
+
+1. Build the release notes
+
+    ```bash
+    ./gradle createReleaseNotes
+    ```
 
 This will look in the GitHub repository for a milestone with the provided title and will use the closed issues in that
 milestone to generate the release notes. In the example above there is only a single issue group and would generate
-a report like:
+a report at `build/github/release-notes.md` with content:
 
 ```md
 # All issues
@@ -53,6 +59,7 @@ gitHubRelease {
     gitHubUser = "$gitHubUser"
     repositoryName = "$repoName"
     milestoneVersion = "$milestoneVersion"
+    headerRenderer = { milestone -> "Appears above the issue groups: ${milestone.description}" }
     groupings = {
         group {
             heading = "## Enhancements"
@@ -72,6 +79,7 @@ gitHubRelease {
             renderer = { issue, _ -> "- [GH-${issue.number}]: ${issue.title}" }
         }
     }
+    footerRenderer = { milestone -> "Footer!" }
 }
 ```
 
